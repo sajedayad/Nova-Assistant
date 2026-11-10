@@ -1,0 +1,79 @@
+{
+  "user_name": "Alex",
+  "call_name": "Alex",
+  "assistant_name": "Nova",
+  "about": [
+    "20 Jahre alt, studiert Informatik im 2. Semester.",
+    "Geht 3x pro Woche ins Gym und will gesünder essen.",
+    "Will sein Alltagsdeutsch verbessern, vor allem lockeres Deutsch wie unter Studis."
+  ],
+  "voice": "de-DE-SeraphinaMultilingualNeural",
+  "model": "claude-haiku-5-5",
+  "gym_log_url": "",
+  "port": 7777,
+
+  "pronunciation": {
+    "nochmal": "noch mal",
+    "sorry": "tut mir leid"
+  },
+
+  "sleep_hours": 8,
+  "morning_buffer_min": 60,
+  "bedtime_warning_min": 30,
+  "default_wake": "09:00",
+
+  "meal_gap_hours": 5,
+  "kcal_target": 2200,
+  "protein_target": 150,
+
+  "study_focus_min": 50,
+  "study_break_min": 10,
+  "nag_every_min": 5,
+  "max_nags": 3,
+
+  "weekly_checkin": { "day": "sun", "time": "19:00" },
+  "weekly_report": { "day": "sun", "time": "18:00" },
+
+  "lights": { "enabled": true, "on_chat": true, "devices": [] },
+
+  "echo": { "kinds": ["bed", "brief", "report", "weekly"], "max_per_day": 6 },
+
+  "week": {
+    "mon": [
+      { "start": "08:00", "end": "12:00", "type": "uni",   "title": "Uni: Vorlesungen" },
+      { "start": "13:30", "end": "14:15", "type": "gym",   "title": "Gym: Upper A" },
+      { "start": "15:00", "end": "18:00", "type": "study", "title": "Lernen" },
+      { "start": "18:15", "end": "19:00", "type": "cook",  "title": "Kochen & Essen" }
+    ],
+    "tue": [
+      { "start": "08:00", "end": "18:00", "type": "uni",   "title": "Uni: Vorlesungen" },
+      { "start": "18:30", "end": "19:15", "type": "cook",  "title": "Kochen & Essen" },
+      { "start": "19:30", "end": "20:30", "type": "study", "title": "Tag wiederholen" }
+    ],
+    "wed": [
+      { "start": "09:00", "end": "12:00", "type": "study", "title": "Lernen" },
+      { "start": "13:30", "end": "14:15", "type": "gym",   "title": "Gym: Lower + Arme" },
+      { "start": "15:00", "end": "18:00", "type": "study", "title": "Lernen" },
+      { "start": "18:15", "end": "19:00", "type": "cook",  "title": "Kochen & Essen" }
+    ],
+    "thu": [
+      { "start": "09:00", "end": "12:00", "type": "study", "title": "Lernen" },
+      { "start": "14:00", "end": "17:00", "type": "study", "title": "Lernen" },
+      { "start": "17:15", "end": "18:00", "type": "cook",  "title": "Kochen & Essen" },
+      { "start": "19:00", "end": "20:00", "type": "study", "title": "Lernen" }
+    ],
+    "fri": [
+      { "start": "08:00", "end": "16:00", "type": "uni",   "title": "Uni: Vorlesungen" },
+      { "start": "16:30", "end": "17:15", "type": "gym",   "title": "Gym: Upper B" },
+      { "start": "17:30", "end": "18:30", "type": "study", "title": "Lockeres Wiederholen" },
+      { "start": "18:45", "end": "19:30", "type": "cook",  "title": "Kochen & Essen" }
+    ],
+    "sat": [
+      { "start": "10:00", "end": "13:00", "type": "study", "title": "Lernen" },
+      { "start": "13:15", "end": "14:00", "type": "cook",  "title": "Kochen & Essen" }
+    ],
+    "sun": [
+      { "start": "13:00", "end": "13:45", "type": "cook",  "title": "Kochen & Essen" }
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+# Secrets & personal data – never commit
+config.json
+API_KEY.txt
+.env
+.cloud_pw
+data/
+# Local stuff
+.venv/
+__pycache__/
+.DS_Store

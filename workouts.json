@@ -1,0 +1,38 @@
+{
+  "_info": "Dein Trainingsplan. reps = Wiederholungsbereich, rest = Pause in Sekunden, step = wie viel kg mehr, wenn du alle Sätze oben schaffst.",
+  "workouts": {
+    "Upper A": {
+      "match": ["upper a"],
+      "exercises": [
+        { "name": "Brustpresse (Maschine)",          "sets": 3, "reps": "8-12",  "rest": 90, "step": 2.5 },
+        { "name": "Latzug",                          "sets": 3, "reps": "8-12",  "rest": 90, "step": 2.5 },
+        { "name": "Schulterdrücken Kurzhanteln",     "sets": 3, "reps": "8-12",  "rest": 90, "step": 2 },
+        { "name": "Rudern am Kabel (sitzend)",       "sets": 3, "reps": "10-12", "rest": 75, "step": 2.5 },
+        { "name": "Bizeps-Curls Kurzhanteln",        "sets": 3, "reps": "10-12", "rest": 60, "step": 1 },
+        { "name": "Trizeps-Pushdown (Kabel)",        "sets": 3, "reps": "10-12", "rest": 60, "step": 2.5 }
+      ]
+    },
+    "Lower + Arme": {
+      "match": ["lower"],
+      "exercises": [
+        { "name": "Beinpresse",                      "sets": 3, "reps": "10-12", "rest": 120, "step": 5 },
+        { "name": "Beinbeuger (Maschine)",           "sets": 3, "reps": "10-12", "rest": 75,  "step": 2.5 },
+        { "name": "Beinstrecker",                    "sets": 3, "reps": "12-15", "rest": 60,  "step": 2.5 },
+        { "name": "Wadenheben (Maschine)",           "sets": 3, "reps": "12-15", "rest": 60,  "step": 5 },
+        { "name": "Hammer-Curls",                    "sets": 3, "reps": "10-12", "rest": 60,  "step": 1 },
+        { "name": "Trizeps über Kopf (Kabel)",       "sets": 3, "reps": "10-12", "rest": 60,  "step": 2.5 }
+      ]
+    },
+    "Upper B": {
+      "match": ["upper b"],
+      "exercises": [
+        { "name": "Schrägbankdrücken Kurzhanteln",   "sets": 3, "reps": "8-12",  "rest": 90, "step": 2 },
+        { "name": "Rudern an der Maschine",          "sets": 3, "reps": "8-12",  "rest": 90, "step": 2.5 },
+        { "name": "Seitheben Kurzhanteln",           "sets": 3, "reps": "12-15", "rest": 60, "step": 1 },
+        { "name": "Face Pulls (Kabel)",              "sets": 3, "reps": "12-15", "rest": 60, "step": 2.5 },
+        { "name": "Bizeps-Curls am Kabel",           "sets": 3, "reps": "10-12", "rest": 60, "step": 2.5 },
+        { "name": "Dips / Trizeps-Maschine",         "sets": 3, "reps": "10-12", "rest": 60, "step": 2.5 }
+      ]
+    }
+  }
+}

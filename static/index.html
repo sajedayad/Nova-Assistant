@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nova</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Nova">
+<meta name="theme-color" content="#04060c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: full-screen night sky, orb as the centre of gravity, a quiet "Heute" rail on the right */
+:root{
+  --void:#04060c; --panel:rgba(14,20,34,.72); --line:rgba(140,170,220,.14);
+  --text:#e6edf8; --dim:#8593ab; --ice:#7fe3ff; --violet:#a98bff; --ember:#ffb27a; --mint:#7dffc8;
+  --display:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --body:"Inter",ui-sans-serif,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{background:radial-gradient(1200px 800px at 40% 40%,#0b1324 0%,var(--void) 70%);color:var(--text);font:14px/1.5 var(--body);overflow:hidden}
+.app{display:grid;grid-template-columns:1fr 340px;height:100%}
+.stage{position:relative;display:flex;flex-direction:column;min-width:0}
+header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:calc(22px + env(safe-area-inset-top,0px)) 28px 0}
+.brand{font:600 15px var(--display);letter-spacing:.38em;color:var(--ice)}
+.brand span{color:var(--dim);font-weight:400;letter-spacing:.12em;margin-left:10px;font-size:12px}
+.clock{font:500 15px var(--mono);color:var(--dim)}
+.orbwrap{flex:1;min-height:0;position:relative}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.caption{min-height:3.2em;text-align:center;padding:0 40px;font:500 20px/1.45 var(--display);text-wrap:balance;max-width:820px;margin:0 auto;transition:opacity .4s}
+.status{text-align:center;font:500 11px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin:8px 0 14px}
+.ack{display:none;justify-content:center;gap:10px;align-items:center;margin-bottom:14px}
+.ack.show{display:flex}
+.ack .lbl{color:var(--ember);font:500 13px var(--body)}
+.bar{display:flex;gap:10px;padding:0 28px 26px;max-width:860px;width:100%;margin:0 auto}
+input{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:14px;color:var(--text);font:15px var(--body);padding:14px 16px;outline:none}
+input:focus{border-color:rgba(127,227,255,.5)}
+button{font:500 14px var(--body);border-radius:14px;border:1px solid var(--line);background:var(--panel);color:var(--text);padding:0 18px;cursor:pointer;min-height:48px}
+button:hover{border-color:rgba(127,227,255,.45)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--ice);outline-offset:2px}
+.mic{width:52px;padding:0;display:grid;place-items:center}
+.mic.on{background:rgba(125,255,200,.15);border-color:var(--mint)}
+.ack button{min-height:38px;border-radius:999px}
+.ack .go{background:rgba(125,255,200,.14);border-color:rgba(125,255,200,.5)}
+.log{max-width:820px;width:100%;margin:0 auto 10px;padding:0 40px;max-height:110px;overflow:auto;font-size:13px;color:var(--dim);display:flex;flex-direction:column;gap:2px}
+.log .me{color:#b9c6dc}.log .me::before{content:"Du  ";font-family:var(--mono);font-size:11px;color:var(--dim)}
+.log .nv::before{content:"Nova  ";font-family:var(--mono);font-size:11px;color:var(--ice)}
+.log .tip{color:var(--violet)}.log .tip::before{content:"Tipp  ";font-family:var(--mono);font-size:11px;color:var(--violet)}
+.tips{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.tips li{font-size:13px;color:var(--dim)}.tips s{color:#c98a8a}.tips b{color:var(--text);font-weight:500}
+
+aside{border-left:1px solid var(--line);background:linear-gradient(180deg,rgba(10,15,27,.85),rgba(6,9,17,.9));padding:24px 22px;overflow:auto;display:flex;flex-direction:column;gap:22px}
+h2{font:600 12px var(--display);letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin:0 0 10px}
+.day{font:600 26px var(--display);margin:0}
+.day small{font:400 14px var(--mono);color:var(--dim);margin-left:8px}
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.tl li{display:grid;grid-template-columns:52px 10px 1fr;gap:10px;align-items:start;padding:7px 0}
+.tl .t{font:400 12px var(--mono);color:var(--dim);padding-top:2px;font-variant-numeric:tabular-nums}
+.tl .dot{width:8px;height:8px;border-radius:50%;margin-top:6px;background:var(--c,var(--dim))}
+.tl .ttl{font-size:14px}
+.tl .sub{font:400 11px var(--mono);color:var(--dim)}
+.tl li.past{opacity:.38}
+.tl li.now .ttl{color:var(--c);font-weight:500}
+.tl li.now .dot{box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 25%,transparent)}
+.study{--c:var(--ice)}.gym{--c:var(--ember)}.cook{--c:var(--mint)}.uni{--c:var(--violet)}.work{--c:#ffd36e}.free{--c:var(--dim)}.bed{--c:#6f86ff}
+.planhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.planhead h2{margin:0}
+#replanned{color:var(--violet);letter-spacing:.1em}
+button.small{min-height:32px;padding:0 12px;font-size:12px;border-radius:999px}
+.week{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.stat b{display:block;font:600 22px var(--display);font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--dim)}
+.stat.fire b{color:var(--ember)}
+.update{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:6;display:none;gap:10px;align-items:center;background:var(--panel);border:1px solid rgba(169,139,255,.5);border-radius:999px;padding:6px 6px 6px 16px}
+.update.show{display:flex}
+.hdr{display:flex;gap:14px;align-items:center}
+.wake{text-decoration:none;color:var(--text);background:var(--panel);border:1px solid var(--line);min-height:32px;padding:0 12px;font-size:12px;border-radius:999px;display:flex;gap:6px;align-items:center}
+.wake.on{border-color:var(--mint);color:var(--mint)}
+.wake i{width:7px;height:7px;border-radius:50%;background:var(--dim)}
+.wake.on i{background:var(--mint);box-shadow:0 0 8px var(--mint)}
+.meter{display:flex;flex-direction:column;gap:10px}
+.m .row{display:flex;justify-content:space-between;font-size:13px}
+.m .row b{font:500 12px var(--mono);color:var(--dim);font-weight:400}
+.track{height:6px;border-radius:6px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:5px}
+.fill{height:100%;border-radius:6px;background:var(--mint);width:0;transition:width .6s}
+.phrase{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:rgba(169,139,255,.06)}
+.phrase q{display:block;font:600 18px var(--display);color:var(--violet);quotes:"„" "“"}
+.phrase p{margin:6px 0 0;color:var(--dim);font-size:13px}
+
+.gate{position:fixed;inset:0;display:grid;place-items:center;background:rgba(4,6,12,.86);backdrop-filter:blur(6px);z-index:5}
+.gate div{text-align:center;display:flex;flex-direction:column;gap:18px;align-items:center;padding:0 24px}
+.gate h1{font:600 44px var(--display);letter-spacing:.3em;margin:0;color:var(--ice)}
+.gate p{color:var(--dim);margin:0;max-width:380px}
+.gate button{padding:0 28px;font-size:15px;border-color:rgba(127,227,255,.5)}
+.warn{color:var(--ember)!important}
+
+
+.gymbtn.on{border-color:var(--ember);color:var(--ember)}
+
+@media (max-width:860px){
+  body{overflow:auto}
+  .app{grid-template-columns:1fr;height:auto}
+  .stage{height:100vh}
+  aside{border-left:0;border-top:1px solid var(--line)}
+  .bar{padding:0 16px 20px}.caption{font-size:17px;padding:0 16px}.log{padding:0 16px}
+  header{padding:calc(14px + env(safe-area-inset-top,0px)) 16px 0}
+  .brand span{display:none}
+  .clock{display:none}
+  .bar{padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="stage">
+    <header><div class="brand">NOVA<span>dein Kumpel · streng beim Lernen</span></div><div class="hdr"><a class="wake gymbtn" id="gymBtn" href="#" hidden target="_blank" rel="noopener" title="Dein Gym Log öffnen">💪 Gym Log</a><button class="wake" id="bell" hidden title="Benachrichtigungen einschalten">🔔 Anrufe an</button><button class="wake" id="wake" title="Nova hört auf „Hey Nova“"><i></i>Hey Nova</button><div class="clock" id="clock">--:--</div></div></header>
+    <div class="orbwrap"><canvas id="orb" aria-label="Nova"></canvas></div>
+    <div class="caption" id="caption"></div>
+    <div class="status" id="status">bereit</div>
+    <div class="ack" id="ack"><span class="lbl" id="ackLbl"></span><button class="go" id="ackOk">Bin dabei</button><button id="ackLater">10 Min</button><a class="wake gymbtn on" id="ackGym" hidden target="_blank" rel="noopener">💪 Gym Log öffnen</a></div>
+    <div class="log" id="log"></div>
+    <div class="bar">
+      <button class="mic" id="mic" title="Sprechen (Leertaste halten)" aria-label="Sprechen">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+      </button>
+      <input id="text" placeholder="Schreib Nova was …" autocomplete="off">
+      <button id="send">Senden</button>
+    </div>
+  </main>
+  <aside>
+    <section><p class="day" id="day">Heute</p></section>
+    <section><div class="planhead"><h2>Plan <span id="replanned" hidden>· neu geplant</span></h2><button class="small" id="replan">Tag neu planen</button></div><ul class="tl" id="tl"></ul></section>
+    <section class="meter"><h2>Essen heute</h2>
+      <div class="m"><div class="row"><span>Kalorien</span><b id="kcal">0 / 0</b></div><div class="track"><div class="fill" id="kcalF"></div></div></div>
+      <div class="m"><div class="row"><span>Protein</span><b id="prot">0 / 0 g</b></div><div class="track"><div class="fill" id="protF" style="background:var(--ice)"></div></div></div>
+    </section>
+    <section><h2>Diese Woche</h2><div class="week">
+      <div class="stat fire"><b id="wStreak">0</b><span>Tage Lern-Streak</span></div>
+      <div class="stat"><b id="wHours">0 h</b><span>gelernt</span></div>
+      <div class="stat"><b id="wGym">0 / 3</b><span>Gym</span></div>
+      <div class="stat"><b id="wProt">–</b><span>Ø Protein am Tag</span></div>
+    </div></section>
+    <section id="tipsBox" hidden><h2>Deine Deutsch-Tipps</h2><ul class="tips" id="tips"></ul></section>
+    <section id="phraseBox" hidden><h2>Spruch des Tages</h2><div class="phrase"><q id="phrase"></q><p id="phraseM"></p></div></section>
+  </aside>
+</div>
+
+<div class="update" id="update"><span>Nova hat ein Update</span><button class="small" onclick="location.reload()">Neu laden</button></div>
+
+<div class="gate" id="gate"><div>
+  <h1>NOVA</h1>
+  <p>Klick einmal, damit Nova sprechen darf. Lass dieses Fenster danach einfach offen.</p>
+  <button id="start">Nova aktivieren</button>
+  <p id="iosHint" hidden>Tipp fürs iPhone: Teilen-Symbol → „Zum Home-Bildschirm“. Dann kann Nova dich auch anrufen, wenn die App zu ist.</p>
+  <p id="keywarn" class="warn" hidden>Kein API-Key gefunden. Trag ihn in API_KEY.txt ein und starte Nova neu.</p>
+</div></div>
+
+<script>
+const $ = id => document.getElementById(id);
+let lastId = 0, ctx, analyser, data, level = 0, mode = "idle", started = false;
+const audio = new Audio(); audio.crossOrigin = "anonymous";
+const queue = [];
+
+/* ── Orb ── */
+const cv = $("orb"), g = cv.getContext("2d");
+const HUE = {idle:192, listening:158, thinking:262, speaking:198, alert:24};
+let hue = 192;
+const parts = Array.from({length:90}, () => ({a:Math.random()*6.28, r:1.15+Math.random()*0.9, s:(Math.random()*.4+.1)*(Math.random()<.5?-1:1), z:Math.random()}));
+function size(){ const d = devicePixelRatio||1; cv.width = cv.clientWidth*d; cv.height = cv.clientHeight*d; }
+new ResizeObserver(size).observe(cv); size();
+function frame(t){
+  t /= 1000;
+  const W = cv.width, H = cv.height, cx = W/2, cy = H/2, R = Math.min(W,H)*0.24;
+  let target = 0;
+  if (mode === "speaking" && analyser){ analyser.getByteFrequencyData(data); let s=0; for (let i=2;i<48;i++) s+=data[i]; target = Math.min(1, s/(46*150)); }
+  else if (mode === "listening") target = 0.25 + 0.15*Math.sin(t*6);
+  else if (mode === "thinking") target = 0.18;
+  else target = 0.05 + 0.04*Math.sin(t*1.3);
+  level += (target - level) * 0.18;
+  hue += ((HUE[mode]??192) - hue) * 0.05;
+  g.clearRect(0,0,W,H);
+  // halo
+  let gr = g.createRadialGradient(cx,cy,R*0.2,cx,cy,R*(2.1+level));
+  gr.addColorStop(0,`hsla(${hue},95%,70%,${0.22+level*0.35})`); gr.addColorStop(1,"hsla(0,0%,0%,0)");
+  g.fillStyle = gr; g.fillRect(0,0,W,H);
+  // particles
+  for (const p of parts){
+    p.a += p.s*0.004*(1+level*4);
+    const rr = R*p.r*(1+level*0.15), x = cx+Math.cos(p.a)*rr, y = cy+Math.sin(p.a)*rr*0.92;
+    g.fillStyle = `hsla(${hue+p.z*40},90%,80%,${0.25+p.z*0.5})`;
+    g.beginPath(); g.arc(x,y,(0.6+p.z*1.4)*(devicePixelRatio||1),0,6.283); g.fill();
+  }
+  // shells
+  const spin = mode === "thinking" ? t*2.2 : t*0.4;
+  for (let L=0; L<6; L++){
+    g.beginPath();
+    for (let i=0;i<=180;i++){
+      const a = i/180*6.283;
+      const n = Math.sin(a*3+t*1.1+L)*0.5 + Math.sin(a*5-t*1.7+L*2)*0.3 + Math.sin(a*8+spin+L)*0.2;
+      const r = R*(0.92+L*0.035) + n*R*(0.035+level*0.32);
+      const x = cx+Math.cos(a)*r, y = cy+Math.sin(a)*r;
+      i ? g.lineTo(x,y) : g.moveTo(x,y);
+    }
+    g.strokeStyle = `hsla(${hue+L*9},95%,${68+L*3}%,${0.5-L*0.06})`;
+    g.lineWidth = (1.4-L*0.15)*(devicePixelRatio||1); g.stroke();
+  }
+  // core
+  gr = g.createRadialGradient(cx,cy,0,cx,cy,R*(0.95+level*0.2));
+  gr.addColorStop(0,`hsla(${hue},100%,96%,${0.9})`);
+  gr.addColorStop(0.35,`hsla(${hue},95%,70%,${0.55+level*0.3})`);
+  gr.addColorStop(1,`hsla(${hue+30},90%,40%,0)`);
+  g.fillStyle = gr; g.beginPath(); g.arc(cx,cy,R*(0.95+level*0.2),0,6.283); g.fill();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* ── Helpers ── */
+function setMode(m, label){ mode = m; $("status").textContent = label ?? {idle:"bereit",listening:"hört zu …",thinking:"denkt nach …",speaking:"spricht",alert:"ruft dich"}[m]; }
+function caption(t){ const c=$("caption"); c.style.opacity=0; setTimeout(()=>{c.textContent=t; c.style.opacity=1;},150); }
+function log(who, t){ const d=document.createElement("div"); d.className=who; d.textContent=t; $("log").append(d); while($("log").children.length>30) $("log").firstChild.remove(); $("log").scrollTop=1e9; }
+function say(text, url, alert){
+  caption(text); log("nv", text);
+  if (url) { queue.push({url, alert}); if (audio.paused && !playing) next(); }
+  else setMode("idle");
+}
+let playing = false;
+function next(){
+  const q = queue.shift();
+  if (!q){ playing=false; setMode("idle"); return; }
+  playing = true; audio.src = q.url; setMode(q.alert ? "alert" : "speaking");
+  if (q.alert) setTimeout(()=>{ if(playing) setMode("speaking"); }, 900);
+  audio.play().catch(()=>{ playing=false; setMode("idle"); });
+}
+audio.onended = next;
+audio.onerror = next;
+
+async function api(path, body){
+  const r = await fetch(path, body ? {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)} : {});
+  if (r.status === 401){ location.reload(); throw new Error("login"); }
+  return r.json();
+}
+
+/* ── Today panel ── */
+const TYPE = {study:"Lernen",gym:"Gym",cook:"Essen",uni:"Uni",work:"Arbeit",free:"Frei"};
+function renderToday(d){
+  if (!d) return;
+  $("day").innerHTML = `${d.day}<small>${d.date}</small>`;
+  const tl = $("tl"); tl.innerHTML = "";
+  for (const e of d.events){
+    const li = document.createElement("li"); li.className = `${e.type} ${e.status}`;
+    li.innerHTML = `<span class="t">${e.start}</span><span class="dot"></span><span><div class="ttl"></div><div class="sub">${TYPE[e.type]||e.type} · bis ${e.end}</div></span>`;
+    li.querySelector(".ttl").textContent = e.title; tl.append(li);
+  }
+  const b = document.createElement("li"); b.className = "bed next";
+  b.innerHTML = `<span class="t">${d.bedtime}</span><span class="dot"></span><span><div class="ttl">Schlafenszeit</div><div class="sub">für 8 Stunden Schlaf</div></span>`;
+  tl.append(b);
+  $("kcal").textContent = `${d.kcal} / ${d.kcal_target}`; $("kcalF").style.width = Math.min(100, d.kcal/d.kcal_target*100)+"%";
+  $("prot").textContent = `${d.protein} / ${d.protein_target} g`; $("protF").style.width = Math.min(100, d.protein/d.protein_target*100)+"%";
+  if (d.phrase){ $("phraseBox").hidden = false; $("phrase").textContent = d.phrase.p; $("phraseM").textContent = d.phrase.m; }
+  $("ack").classList.toggle("show", !!d.pending);
+  $("ackLbl").textContent = d.pending ? `Läuft: ${d.pending}` : "";
+  if ($("keywarn")) $("keywarn").hidden = d.has_key;
+  $("replanned").hidden = !d.replanned;
+  if (d.fillers) fillers = d.fillers;
+  $("gymBtn").classList.toggle("on", !!d.gym_today);
+  $("gymBtn").hidden = !d.gym_log_url;
+  if (d.gym_log_url){ $("gymBtn").href = d.gym_log_url; $("ackGym").href = d.gym_log_url; }
+  $("ackGym").hidden = !(d.gym_log_url && d.pending_type === "gym");
+  if (d.week){
+    $("wStreak").textContent = d.week.streak; $("wHours").textContent = d.week.study_hours + " h";
+    $("wGym").textContent = `${d.week.gym_done} / ${d.week.gym_goal}`;
+    $("wProt").textContent = d.week.protein_avg == null ? "–" : d.week.protein_avg + " g";
+  }
+  if (d.ui){ if (!uiVersion) uiVersion = d.ui; else if (d.ui !== uiVersion) $("update").classList.add("show"); }
+  if (d.tips && d.tips.length){
+    $("tipsBox").hidden = false; const ul = $("tips"); ul.innerHTML = "";
+    for (const t of d.tips){ const li = document.createElement("li"); li.innerHTML = "<s></s> → <b></b><br><span></span>";
+      li.querySelector("s").textContent = t.falsch; li.querySelector("b").textContent = t.richtig; li.querySelector("span").textContent = t.warum; ul.append(li); }
+  }
+}
+
+/* ── Poll ── */
+async function poll(){
+  try{
+    const r = await api(`/api/poll?after=${lastId}`);
+    for (const m of r.items){ say(m.text, m.audio, ["nag","study","gym","meal","bed","weekly","report"].includes(m.kind)); if (m.needs_ack) $("ack").classList.add("show"); }
+    lastId = Math.max(lastId, r.last); renderToday(r.today);
+  }catch(e){ setMode("idle","offline – läuft der Server?"); }
+}
+
+/* ── Chat ── */
+let fillers = [], lastFiller = -1, uiVersion = null;
+let sending = false, lastSent = {t:"", at:0};
+async function send(text){
+  text = (text || "").trim(); if (!text) return;
+  if (sending) return;                                                   // schon unterwegs
+  if (text === lastSent.t && Date.now() - lastSent.at < 5000) return;     // gleiche Nachricht doppelt
+  sending = true; lastSent = {t:text, at:Date.now()};
+  $("text").value = ""; log("me", text); setMode("thinking");
+  try{ await sendInner(text); } finally { sending = false; }
+}
+async function sendInner(text){
+  // kurzes "Hmm …", falls die Antwort nicht sofort da ist
+  let done = false;
+  setTimeout(() => {
+    if (done || !fillers.length || playing) return;
+    let i; do { i = Math.floor(Math.random()*fillers.length); } while (fillers.length > 1 && i === lastFiller);
+    lastFiller = i; queue.push({url: fillers[i]}); next(); setTimeout(()=>{ if (!done) setMode("thinking"); }, 900);
+  }, 600);
+  try{
+    const r = await api("/api/chat",{text}); done = true;
+    caption(r.reply); log("nv", r.reply); if (r.tip) log("tip", `${r.tip.falsch} → ${r.tip.richtig}  (${r.tip.warum})`); renderToday(r.today);
+    const a = await api("/api/speak",{text:r.spoken || r.reply});
+    if (a.audio){ queue.push({url:a.audio}); if (!playing) next(); } else setMode("idle");
+  }
+  catch(e){ done = true; setMode("idle","Fehler – läuft der Server?"); }
+}
+$("send").onclick = () => send($("text").value);
+$("replan").onclick = () => send("Mein Tag läuft heute anders als geplant. Lass uns den Rest vom Tag neu planen.");
+$("text").addEventListener("keydown", e => { if (e.key === "Enter" && !e.isComposing && !e.repeat){ e.preventDefault(); send($("text").value); } });
+$("ackOk").onclick = async () => { const r = await api("/api/ack",{action:"ok"}); say(r.reply, r.audio); renderToday(r.today); };
+$("ackLater").onclick = async () => { const r = await api("/api/ack",{action:"later"}); say(r.reply, r.audio); renderToday(r.today); };
+
+/* ── Voice input ── */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec, recOn = false, finalText = "", heard = "";
+if (SR){
+  rec = new SR(); rec.lang = "de-DE"; rec.interimResults = true; rec.continuous = false;
+  rec.onresult = e => { let t=""; finalText=""; for (const r of e.results){ t += r[0].transcript; if (r.isFinal) finalText += r[0].transcript; } heard = t; $("text").value = t; };
+  rec.onend = () => { recOn = false; $("mic").classList.remove("on"); if (wakeOn) setTimeout(wakeStart, 600); const t = finalText || heard; heard = ""; if (t.trim()) send(t); else setMode("idle"); };
+  rec.onerror = e => { recOn = false; $("mic").classList.remove("on"); setMode("idle", e.error === "not-allowed" ? "Mikrofon nicht erlaubt" : "nicht verstanden"); };
+} else { $("mic").title = "Spracheingabe geht in diesem Browser nicht – nimm Safari oder Chrome"; $("mic").style.opacity = .4; }
+function listen(){
+  if (!rec || recOn) return;
+  if (wrec) try{ wrec.abort(); }catch(e){}
+  audio.pause(); queue.length = 0; playing = false; finalText=""; recOn = true; $("mic").classList.add("on"); setMode("listening");
+  setTimeout(() => { try{ rec.start(); }catch(e){} }, 150);
+}
+
+/* ── "Hey Nova" ── */
+let wakeOn = false, wrec = null;
+try{ wakeOn = localStorage.getItem("nova-wake") === "1"; }catch(e){}
+function updWake(){ $("wake").classList.toggle("on", wakeOn); $("wake").setAttribute("aria-pressed", wakeOn); }
+function wakeStart(){ if (!wrec || !wakeOn || recOn || !started) return; try{ wrec.start(); }catch(e){} }
+if (SR){
+  wrec = new SR(); wrec.lang = "de-DE"; wrec.continuous = true; wrec.interimResults = false;
+  wrec.onresult = e => {
+    if (playing) return;                       // nicht auf sich selbst reagieren
+    for (let i = e.resultIndex; i < e.results.length; i++){
+      if (!e.results[i].isFinal) continue;
+      const t = e.results[i][0].transcript.trim();
+      const m = t.match(/(?:^\s*|(?:hey|hi|hallo|ok|okay|ey)[,]?\s+)(?:nova|noah|nowa|no va)\b[,.!?]?\s*(.*)$/i);
+      if (m){
+        const cmd = m[1].trim();
+        try{ wrec.abort(); }catch(err){}
+        if (cmd.split(/\s+/).length >= 2) send(cmd); else setTimeout(listen, 250);
+        return;
+      }
+    }
+  };
+  wrec.onend = () => { if (wakeOn && !recOn) setTimeout(wakeStart, 400); };
+  wrec.onerror = e => { if (e.error === "not-allowed"){ wakeOn = false; updWake(); setMode("idle","Mikrofon nicht erlaubt"); } };
+} else { $("wake").hidden = true; }
+$("wake").onclick = () => {
+  wakeOn = !wakeOn; updWake();
+  try{ localStorage.setItem("nova-wake", wakeOn ? "1" : "0"); }catch(e){}
+  if (wakeOn) wakeStart(); else if (wrec) try{ wrec.abort(); }catch(e){}
+};
+updWake();
+function stopListen(){ if (rec && recOn) rec.stop(); }
+$("mic").onclick = () => recOn ? stopListen() : listen();
+addEventListener("keydown", e => { if (e.code === "Space" && document.activeElement !== $("text") && !e.repeat && started){ e.preventDefault(); listen(); } });
+addEventListener("keyup", e => { if (e.code === "Space" && document.activeElement !== $("text")) stopListen(); });
+
+/* ── iPhone / Benachrichtigungen ── */
+const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+const standalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+let swReg = null;
+if ("serviceWorker" in navigator && location.protocol === "https:"){
+  navigator.serviceWorker.register("/sw.js").then(r => { swReg = r; checkBell(); }).catch(()=>{});
+}
+if (isIOS && !standalone && location.protocol === "https:") $("iosHint").hidden = false;
+function b64ToBytes(b){ const p = "=".repeat((4 - b.length % 4) % 4); const r = atob((b + p).replace(/-/g,"+").replace(/_/g,"/")); return Uint8Array.from(r, c => c.charCodeAt(0)); }
+async function checkBell(){
+  if (!swReg || !("PushManager" in window) || !("Notification" in window)) return;
+  const sub = await swReg.pushManager.getSubscription().catch(()=>null);
+  $("bell").hidden = !!(sub && Notification.permission === "granted");
+}
+$("bell").onclick = async () => {
+  try{
+    const perm = await Notification.requestPermission();
+    if (perm !== "granted"){ setMode("idle","Benachrichtigungen nicht erlaubt"); return; }
+    const {key} = await api("/api/push/key");
+    const sub = await swReg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:b64ToBytes(key)});
+    await api("/api/push/subscribe", sub.toJSON());
+    $("bell").hidden = true; setMode("idle","Anrufe sind an ✓");
+  }catch(e){ setMode("idle", isIOS && !standalone ? "Erst zum Home-Bildschirm hinzufügen" : "Ging nicht: " + e.message); }
+};
+
+
+/* ── Start ── */
+setInterval(() => { $("clock").textContent = new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"}); }, 1000);
+$("start").onclick = async () => {
+  started = true;
+  ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const src = ctx.createMediaElementSource(audio); analyser = ctx.createAnalyser(); analyser.fftSize = 256;
+  data = new Uint8Array(analyser.frequencyBinCount); src.connect(analyser); analyser.connect(ctx.destination);
+  $("gate").remove();
+  const r = await api("/api/hello", {}); lastId = r.last; renderToday(r.today); say(r.reply, r.audio);
+  setInterval(poll, 4000);
+  if (wakeOn) setTimeout(wakeStart, 1500);
+};
+api(`/api/poll?after=999999`).then(r => renderToday(r.today)).catch(()=>{});
+</script>
+</body>
+</html>

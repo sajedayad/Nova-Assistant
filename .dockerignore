@@ -1,0 +1,6 @@
+data
+.venv
+__pycache__
+API_KEY.txt
+*.command
+README.txt
